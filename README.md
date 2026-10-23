@@ -21,8 +21,8 @@ What will it help them do: playing a video game as a form of entertainment or as
 - Run tests: `py -m unittest discover -v` on Windows, or `python -m unittest discover -v` elsewhere.
 
 ## Author and acknowledgements
-- Name / student ID: [...] N O
+- Name / student ID: Napat Oonsamatham 6680964
 - AI tools used: GitHub Copilot Student.
-- External code/resources: [Links and what you used, or None.]
+- External code/resources: None.
 
 See PLAN.md for the implementation plan and EVIDENCE.md for results and decisions.
