@@ -8,8 +8,11 @@ What will it help them do: playing a video game as a form of entertainment or as
 ## Requirements
 - R1: Attacking. Enemy will occasionally make an opening for player to attack for a limited time at a designated space. The player must move their cursor to that space and press attack input in the given moment. A successful player attack will decrease the enemy's health. Failing to attack in the designated time and space will cause nothing to change. (The player cannot attack if they are blocking).
 - R2: Blocking. Enemy will often attack the player after hinting where it will attack at a designated space. The player must move their cursor to that space and press & hold block input in the given moment. As long as the player is holding block input at the correct area when the enemy's attack lands, it will be a successful block. A successful block will retain the player's health, no damage is done. Failing to block when the enemy's attack lands will decrease the player's health. (The player can block right away after attacking).
+- R2.1: Make the player blocks 5 times before making the enemy becomes vulnerable.
 - R3: The game ends when the player or the enemy loses all their health. If the player is still alive at the end, the player wins. If the player is dead and the enemy is still alive at the end, the player loses. In the rare case, if both the player and the enemy are dead at the same time, the game announces a "Draw" result. When the game ends, the enemy stops attacking and no change will be made to health to prevent unwanted behavior as a boundary.
 - R4: After the game ends in win or loss for the player, the player has the option to restart the game. Upon restart, the game state begins as if the game is opened the first time.
+- R5: When the enemy is successfully hit, prevent any further player successful attack in that vulnerability time. Reset when the enemy is vulnerable again.
+- R6: Hide the idle blocking and attacking prompts until they are in warning and execution time. Randomize the blocking and attacking positions inside the game area for every blocking and attacking prompt cycle. Never let the positions go beyond the game area. (This is for the game replayability).
 
 ## Setup and use
 - Prerequisites: Python 3.12 or another Python 3.x installation with Tkinter/Tcl-Tk support. No third-party packages are required.
