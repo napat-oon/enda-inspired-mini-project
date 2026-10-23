@@ -12,10 +12,10 @@ What will it help them do: playing a video game as a form of entertainment or as
 - R4: After the game ends in win or loss for the player, the player has the option to restart the game. Upon restart, the game state begins as if the game is opened the first time.
 
 ## Setup and use
-- Prerequisites: [Language/version and any dependencies.] Python.
-- Setup: [Exact command(s) or steps.]
-- Run: [Exact command and a brief example of how to use it.]
-- Run tests: [Exact command.]
+- Prerequisites: Python 3.12 or another Python 3.x installation with Tkinter/Tcl-Tk support. No third-party packages are required.
+- Setup: Open a terminal in this project directory. No package installation is needed.
+- Run: `py game.py` on Windows, or `python game.py` where `python` points to Python 3. Hold the right mouse button over the block target during an incoming attack; left-click the attack opening when it appears.
+- Run tests: `py -m unittest discover -v` on Windows, or `python -m unittest discover -v` elsewhere.
 
 ## Author and acknowledgements
 - Name / student ID: [...] N O
