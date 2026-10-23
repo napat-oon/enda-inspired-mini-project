@@ -1,5 +1,5 @@
 # enda-inspired-mini-project
-A small game built with Agentic AI workflow using GitHub Copilot. Created purely for the sake of practicing Agentic AI, not vibe coding. All credits go to the original creators if there are references.
+A small game built with Agentic AI workflow using GitHub Copilot. Created purely for the sake of practicing Agentic AI, not vibe coding. All credits go to the original creators if there are references. Disclaimer: This mini project used AI in coding.
 
 ## Purpose
 Who will use it: gamers or people who are interested in a small game or mini project (with the help of Agentic AI).
