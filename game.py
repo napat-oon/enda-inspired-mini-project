@@ -1,10 +1,15 @@
 import tkinter as tk
+import time
 
-from game_logic import CombatGame, GameResult, Phase
+from game_logic import CombatGame, GameResult, Phase, Target, scaled_target
 
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 520
+WARNING_DURATION = 900
+ATTACK_DURATION = 500
+OPENING_DURATION = 900
+ANIMATION_INTERVAL = 16
 
 
 class CombatApp:
@@ -24,6 +29,13 @@ class CombatApp:
         self.cursor_x = 0
         self.cursor_y = 0
         self.restart_button: tk.Button | None = None
+        self.round_token = 0
+        self.animation_token = 0
+        self.animation_progress = 0.0
+        self.animation_target: Target | None = None
+        self.animation_color = "#f4f1de"
+        self.animation_started_at = 0.0
+        self.animation_duration = 0
 
         self.canvas.bind("<Motion>", self.on_motion)
         self.canvas.bind("<Button-1>", self.on_attack)
@@ -53,40 +65,62 @@ class CombatApp:
     def schedule_round(self) -> None:
         if self.game.is_over:
             return
-        self.root.after(700, self.start_warning)
+        token = self.round_token
+        self.root.after(700, lambda: self.start_warning(token))
 
-    def start_warning(self) -> None:
+    def start_warning(self, token: int) -> None:
+        if token != self.round_token:
+            return
         if not self.game.begin_enemy_warning():
             return
+        self.start_animation(self.game.block_target, WARNING_DURATION, "#55c2a1")
         self.draw()
-        self.root.after(900, self.start_attack)
+        self.root.after(WARNING_DURATION, lambda: self.start_attack(token))
 
-    def start_attack(self) -> None:
+    def start_attack(self, token: int) -> None:
+        if token != self.round_token:
+            return
         if not self.game.begin_enemy_attack():
             return
+        self.animation_progress = 1.0
         self.draw()
-        self.root.after(500, self.resolve_attack)
+        self.root.after(ATTACK_DURATION, lambda: self.resolve_attack(token))
 
-    def resolve_attack(self) -> None:
+    def resolve_attack(self, token: int) -> None:
+        if token != self.round_token:
+            return
         self.game.resolve_enemy_attack(self.cursor_x, self.cursor_y)
         self.draw()
         if self.game.is_over:
+            self.animation_token += 1
             return
-        self.root.after(1000, self.start_opening)
+        self.root.after(1000, lambda: self.start_opening(token))
 
-    def start_opening(self) -> None:
+    def start_opening(self, token: int) -> None:
+        if token != self.round_token:
+            return
         if not self.game.begin_vulnerability():
+            self.game.return_to_idle()
+            self.draw()
+            self.schedule_round()
             return
+        self.start_animation(self.game.opening_target, OPENING_DURATION, "#e87968")
         self.draw()
-        self.root.after(900, self.end_opening)
+        self.root.after(OPENING_DURATION, lambda: self.end_opening(token))
 
-    def end_opening(self) -> None:
+    def end_opening(self, token: int) -> None:
+        if token != self.round_token:
+            return
         if not self.game.return_to_idle():
             return
+        self.animation_token += 1
+        self.animation_target = None
         self.draw()
         self.schedule_round()
 
     def restart(self) -> None:
+        self.round_token += 1
+        self.animation_token += 1
         self.game.restart()
         if self.restart_button is not None:
             self.restart_button.destroy()
@@ -139,20 +173,52 @@ class CombatApp:
             self.canvas.create_rectangle(x + index * 34, y + 22, x + index * 34 + 24, y + 38, fill=fill, outline="")
 
     def draw_areas(self) -> None:
-        block = self.game.block_target
-        opening = self.game.opening_target
-        block_color = "#24463f" if self.game.phase is Phase.ENEMY_ATTACK else "#1e2c38"
-        opening_color = "#5b3b28" if self.game.phase is Phase.VULNERABLE else "#1e2c38"
+        if self.game.phase in (Phase.ENEMY_WARNING, Phase.ENEMY_ATTACK):
+            target = self.game.block_target
+            visible_target = target if self.game.phase is Phase.ENEMY_ATTACK else scaled_target(target, self.animation_progress)
+            self.draw_target(visible_target, "#55c2a1", "BLOCK\nTARGET")
+        elif self.game.phase is Phase.VULNERABLE:
+            target = self.game.opening_target
+            visible_target = scaled_target(target, self.animation_progress)
+            self.draw_target(visible_target, "#e87968", "ATTACK\nOPENING")
+
+    def draw_target(self, target: Target, color: str, label: str) -> None:
         self.canvas.create_rectangle(
-            block.x, block.y, block.x + block.width, block.y + block.height,
-            fill=block_color, outline="#55c2a1", width=2,
+            target.x,
+            target.y,
+            target.x + target.width,
+            target.y + target.height,
+            fill="",
+            outline=color,
+            width=3,
         )
-        self.canvas.create_text(block.x + block.width // 2, block.y + block.height // 2, text="BLOCK\nTARGET", fill="#b9eadb", font=("Segoe UI", 13, "bold"))
-        self.canvas.create_rectangle(
-            opening.x, opening.y, opening.x + opening.width, opening.y + opening.height,
-            fill=opening_color, outline="#e87968", width=2,
-        )
-        self.canvas.create_text(opening.x + opening.width // 2, opening.y + opening.height // 2, text="ATTACK\nOPENING", fill="#ffd0c7", font=("Segoe UI", 13, "bold"))
+        if target.width > 30 and target.height > 30:
+            self.canvas.create_text(
+                target.x + target.width / 2,
+                target.y + target.height / 2,
+                text=label,
+                fill=color,
+                font=("Segoe UI", 13, "bold"),
+            )
+
+    def start_animation(self, target: Target, duration: int, color: str) -> None:
+        self.animation_token += 1
+        token = self.animation_token
+        self.animation_target = target
+        self.animation_color = color
+        self.animation_progress = 0.0
+        self.animation_started_at = time.monotonic()
+        self.animation_duration = duration
+        self.animate_frame(token)
+
+    def animate_frame(self, token: int) -> None:
+        if token != self.animation_token or self.game.is_over or self.animation_target is None:
+            return
+        elapsed = (time.monotonic() - self.animation_started_at) * 1000
+        self.animation_progress = min(1.0, elapsed / self.animation_duration)
+        self.draw()
+        if self.animation_progress < 1.0:
+            self.root.after(ANIMATION_INTERVAL, lambda: self.animate_frame(token))
 
     def draw_phase(self, feedback: str) -> None:
         phase_text = {
