@@ -16,10 +16,10 @@ Write the first two expectations before implementation. Fill in actual results a
 - Code decision: [File/function/component, what I accepted or changed, and why. One or two sentences.]
 
 ## Automated tests
-- Test file and behaviour checked: [...]
-- Command I ran: [...]
-- Final result: [Actual test count and outcome.]
-- Correction and rerun, if needed: [Brief account, or None needed.]
+- Test file and behaviour checked: `test_game_logic.py`; successful and failed blocks, successful and invalid attacks, win/loss/draw results, post-game immutability, and restart.
+- Command I ran: `py -m unittest discover -v`
+- Final result: 8 tests passed.
+- Correction and rerun, if needed: Added atomic simultaneous-exchange handling for the draw boundary, then reran the suite successfully.
 
 ## Realistic use and final judgment
 - Task I tried: [One realistic use from start to finish.]
